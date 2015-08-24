@@ -1,16 +1,18 @@
 <?php
 
 /**
- * Implements hook_init().
- */
+* Implements hook_init().
+*/
 function domain_path_rewrite_init() {
-  if ($domain_path = _domain_path_rewrite_domain_path(current_path())) {
-    global $_domain;
+ if ($domain_path = _domain_path_rewrite_domain_path(current_path())) {
+   global $_domain;
 
-    if (!($_domain['domain_id'] == $domain_path['domain_id'] && request_path() == $domain_path['path'])) {
+   if (!($_domain['domain_id'] == $domain_path['domain_id'] && request_path() == $domain_path['path'])) {
+     if (!function_exists('drush_main')) {
       drupal_goto($domain_path['url'], array(), 301);
-    }
-  }
+     }
+   }
+ }
 }
 
 /**
