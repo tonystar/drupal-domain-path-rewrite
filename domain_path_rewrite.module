@@ -79,3 +79,60 @@ function _domain_path_rewrite_domain_path($source) {
 
   return isset($cache[$source]) ? $cache[$source] : NULL;
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function domain_path_rewrite_form_redirect_edit_form_alter(&$form,&$form_state,$form_id){
+  global $_domain;
+  // Get current domain machine name.
+  if (empty($_domain['machine_name'])) {
+    $domain = domain_load($_domain['domain_id']);
+    $domain_key = $domain['machine_name'];
+  }
+  else {
+    $domain_key = $_domain['machine_name'];
+  }
+  $form['source']['#field_prefix'] = '';
+
+  $domains = domain_domains();
+  $domain_list = array(
+    '' => t('none')
+  );
+
+  foreach ($domains as $domain) {
+    $domain_list[$domain['machine_name']] = $domain['path'];
+  }
+
+  array_unshift($form['source']['#element_validate'], 'domain_path_rewrite_redirect_validate_source');
+
+  $source = explode(":", $form['source']['#default_value']);
+  if (count($source) > 1) {
+    $source_domain_key = array_shift($source);
+    $form['source']['#default_value'] = implode(':', $source);
+    if (array_key_exists($source_domain_key, $domain_list)) {
+      $domain_key = $source_domain_key;
+    }
+  }
+  $form['domain_source'] = array(
+    '#type'          => 'select',
+    '#title'         => t('Domain'),
+    '#options'       => $domain_list,
+    '#default_value' => $domain_key,
+    '#weight'        => -1,
+  );
+}
+
+/**
+ * Populate source element with domain token.
+ */
+function domain_path_rewrite_redirect_validate_source(&$element, &$form_state) {
+  $value = &$element['#value'];
+  $domain_key = drupal_array_get_nested_value($form_state, array('values', 'domain_source'));
+  if (!empty($domain_key)) {
+    $value = $domain_key . ':' . $value;
+
+    form_set_value($element, $value, $form_state);
+  }
+  return $element;
+}
