@@ -98,7 +98,7 @@ function _domain_path_rewrite_domain_path($source, $path_language = NULL) {
     return $cache[$source_und_key];
   }
 
-  $pattern = '/' . str_replace('/', '\/', $source) . ':.+:[' . $path_language .'|' .LANGUAGE_NONE . ']/';
+  $pattern = '/' . preg_quote($source, '/') . ':.+:[' . preg_quote($path_language) .'|' .LANGUAGE_NONE . ']/';
   if (is_array($cache)) {
     $keys = preg_grep($pattern,array_keys($cache));
     if ($keys) {
