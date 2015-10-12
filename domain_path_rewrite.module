@@ -4,6 +4,9 @@
  * Implements hook_init().
  */
 function domain_path_rewrite_init() {
+  if (drupal_is_cli() || function_exists('drush_main')) {
+    return;
+  }
   if ($domain_path = _domain_path_rewrite_domain_path(current_path())) {
     global $_domain;
     if (!($_domain['domain_id'] == $domain_path['domain_id'] && request_path() == $domain_path['path'])) {
